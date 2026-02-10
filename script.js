@@ -1,6 +1,5 @@
 // Initialize
-const API_URL = '/api/issues';
-let issues = [];
+let issues = JSON.parse(localStorage.getItem('interpreterIssues')) || [];
 let editingId = null;
 const SUPERVISOR_PASSWORD = 'supervisor123'; // Change this password
 
@@ -127,16 +126,15 @@ const interpreters = [
     { name: "Gustavo Adolfo Ramirez Azahar", id: "23064", language: "Spanish" }
 ];
 
-// Load issues from server
-async function loadIssues() {
-    try {
-        const response = await fetch(API_URL);
-        issues = await response.json();
-        renderIssues();
-    } catch (error) {
-        console.error('Failed to load issues:', error);
-        alert('Failed to load issues from server');
-    }
+// Load issues from localStorage
+function loadIssues() {
+    issues = JSON.parse(localStorage.getItem('interpreterIssues')) || [];
+    renderIssues();
+}
+
+// Save issues to localStorage
+function saveIssues() {
+    localStorage.setItem('interpreterIssues', JSON.stringify(issues));
 }
 
 // Populate interpreter dropdown
@@ -198,7 +196,7 @@ document.getElementById('issue-type').addEventListener('change', (e) => {
 });
 
 // Form submission
-document.getElementById('issue-form').addEventListener('submit', async (e) => {
+document.getElementById('issue-form').addEventListener('submit', (e) => {
     e.preventDefault();
     
     const issueType = document.getElementById('issue-type').value;
@@ -211,13 +209,15 @@ document.getElementById('issue-form').addEventListener('submit', async (e) => {
     const interpreterLanguage = document.getElementById('interpreter-language').value;
     
     const issue = {
+        id: editingId || Date.now(),
         issueType,
         interpreterName,
         interpreterId,
         interpreterLanguage,
         startDate,
         resolutionDate,
-        status
+        status,
+        createdAt: editingId ? issues.find(i => i.id === editingId).createdAt : new Date().toISOString()
     };
     
     if (issueType === 'missed-call') {
@@ -229,32 +229,22 @@ document.getElementById('issue-form').addEventListener('submit', async (e) => {
         issue.notes = document.getElementById('account-notes').value;
     }
     
-    try {
-        if (editingId) {
-            await fetch(`${API_URL}/${editingId}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(issue)
-            });
-            editingId = null;
-        } else {
-            await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(issue)
-            });
-        }
-        
-        e.target.reset();
-        document.getElementById('missed-call-fields').style.display = 'none';
-        document.getElementById('account-issue-fields').style.display = 'none';
-        
-        alert('Issue saved successfully!');
-        await loadIssues();
-    } catch (error) {
-        console.error('Failed to save issue:', error);
-        alert('Failed to save issue');
+    if (editingId) {
+        const index = issues.findIndex(i => i.id === editingId);
+        issues[index] = issue;
+        editingId = null;
+    } else {
+        issues.push(issue);
     }
+    
+    saveIssues();
+    
+    e.target.reset();
+    document.getElementById('missed-call-fields').style.display = 'none';
+    document.getElementById('account-issue-fields').style.display = 'none';
+    
+    alert('Issue saved successfully!');
+    loadIssues();
 });
 
 // Render issues
@@ -353,7 +343,7 @@ function editIssue(id) {
     window.scrollTo(0, 0);
 }
 
-async function deleteIssue(id) {
+function deleteIssue(id) {
     // Require password for deleting
     const password = prompt('Enter supervisor password to delete:');
     if (password !== SUPERVISOR_PASSWORD) {
@@ -363,13 +353,9 @@ async function deleteIssue(id) {
     
     if (!confirm('Are you sure you want to delete this issue?')) return;
     
-    try {
-        await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-        await loadIssues();
-    } catch (error) {
-        console.error('Failed to delete issue:', error);
-        alert('Failed to delete issue');
-    }
+    issues = issues.filter(i => i.id !== id);
+    saveIssues();
+    loadIssues();
 }
 
 // Filters
@@ -409,6 +395,55 @@ document.getElementById('export-btn').addEventListener('click', () => {
     a.download = `interpreter-issues-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+});
+
+// Export to JSON (for sharing between team members)
+document.getElementById('export-json-btn').addEventListener('click', () => {
+    if (issues.length === 0) {
+        alert('No issues to export');
+        return;
+    }
+    
+    const dataStr = JSON.stringify(issues, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `issues-data-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    alert('Data exported! Share this file with your supervisor.');
+});
+
+// Import from JSON
+document.getElementById('import-json-btn').addEventListener('click', () => {
+    document.getElementById('import-file').click();
+});
+
+document.getElementById('import-file').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        try {
+            const importedIssues = JSON.parse(event.target.result);
+            
+            // Merge with existing issues (avoid duplicates by ID)
+            const existingIds = new Set(issues.map(i => i.id));
+            const newIssues = importedIssues.filter(i => !existingIds.has(i.id));
+            
+            issues = [...issues, ...newIssues];
+            saveIssues();
+            loadIssues();
+            
+            alert(`Imported ${newIssues.length} new issues!`);
+        } catch (error) {
+            alert('Error importing file. Please make sure it\'s a valid JSON file.');
+        }
+    };
+    reader.readAsText(file);
+    e.target.value = ''; // Reset file input
 });
 
 // Set default start date to now
