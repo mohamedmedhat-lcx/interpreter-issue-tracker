@@ -275,8 +275,8 @@ document.getElementById('issue-form').addEventListener('submit', async (e) => {
     const issueType = document.getElementById('issue-type').value;
     const interpreterName = document.getElementById('interpreter-name').value;
     const startDate = document.getElementById('start-date').value;
-    const resolutionDate = document.getElementById('resolution-date').value;
-    const status = document.getElementById('status').value;
+    const attachmentUrl = document.getElementById('attachment-url').value;
+    const status = 'open'; // Always open for new issues
     
     const interpreterId = document.getElementById('interpreter-id').value;
     const interpreterLanguage = document.getElementById('interpreter-language').value;
@@ -287,8 +287,9 @@ document.getElementById('issue-form').addEventListener('submit', async (e) => {
         interpreterId,
         interpreterLanguage,
         startDate,
-        resolutionDate,
-        status
+        attachmentUrl,
+        status,
+        resolutionDate: null
     };
     
     if (issueType === 'missed-call') {
@@ -375,6 +376,7 @@ function renderIssues() {
                 ${issue.missedCallsCount ? `<div class="issue-detail"><strong>Missed Calls:</strong> ${issue.missedCallsCount}</div>` : ''}
                 <div class="issue-detail"><strong>Start:</strong> ${formatDate(issue.startDate)}</div>
                 ${issue.resolutionDate ? `<div class="issue-detail"><strong>Resolved:</strong> ${formatDate(issue.resolutionDate)}</div>` : ''}
+                ${issue.attachmentUrl ? `<div class="issue-detail"><strong>Attachment:</strong> <a href="${issue.attachmentUrl}" target="_blank" style="color: #2196F3;">View File</a></div>` : ''}
             </div>
             ${issue.reason ? `<div class="issue-detail"><strong>Reason:</strong> ${issue.reason}</div>` : ''}
             ${issue.notes ? `<div class="issue-detail"><strong>Notes:</strong> ${issue.notes}</div>` : ''}
@@ -418,7 +420,7 @@ function editIssue(id) {
     document.getElementById('interpreter-id').value = issue.interpreterId || '';
     document.getElementById('interpreter-language').value = issue.interpreterLanguage || '';
     document.getElementById('start-date').value = issue.startDate;
-    document.getElementById('resolution-date').value = issue.resolutionDate || '';
+    document.getElementById('attachment-url').value = issue.attachmentUrl || '';
     document.getElementById('status').value = issue.status;
     
     if (issue.issueType === 'missed-call') {
@@ -463,7 +465,7 @@ document.getElementById('export-btn').addEventListener('click', () => {
         return;
     }
     
-    const headers = ['ID', 'Type', 'Interpreter', 'Interpreter ID', 'Language', 'Call ID', 'Account Status', 'Missed Calls', 'Reason/Notes', 'Start Date', 'Resolution Date', 'Status'];
+    const headers = ['ID', 'Type', 'Interpreter', 'Interpreter ID', 'Language', 'Call ID', 'Account Status', 'Missed Calls', 'Reason/Notes', 'Start Date', 'Attachment URL', 'Status'];
     const rows = issues.map(issue => [
         issue.id,
         formatIssueType(issue.issueType),
@@ -475,7 +477,7 @@ document.getElementById('export-btn').addEventListener('click', () => {
         issue.missedCallsCount || '',
         issue.reason || issue.notes || '',
         issue.startDate,
-        issue.resolutionDate || '',
+        issue.attachmentUrl || '',
         formatStatus(issue.status)
     ]);
     
