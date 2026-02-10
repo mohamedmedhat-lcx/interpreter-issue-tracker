@@ -1,5 +1,6 @@
 {
-  "buildCommand": null,
-  "outputDirectory": ".",
-  "framework": null
+  "rewrites": [
+    { "source": "/api/issues/:id", "destination": "/api/issues" },
+    { "source": "/api/issues", "destination": "/api/issues" }
+  ]
 }
