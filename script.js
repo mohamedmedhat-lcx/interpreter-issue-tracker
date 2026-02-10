@@ -1,5 +1,6 @@
 // Initialize
-let issues = JSON.parse(localStorage.getItem('interpreterIssues')) || [];
+const API_URL = '/api/issues';
+let issues = [];
 let editingId = null;
 const SUPERVISOR_PASSWORD = 'supervisor123'; // Change this password
 
@@ -126,16 +127,21 @@ const interpreters = [
     { name: "Gustavo Adolfo Ramirez Azahar", id: "23064", language: "Spanish" }
 ];
 
-// Load issues from localStorage
-function loadIssues() {
-    issues = JSON.parse(localStorage.getItem('interpreterIssues')) || [];
-    updateIssueCount();
-    renderIssues();
+// Load issues from server
+async function loadIssues() {
+    try {
+        const response = await fetch(API_URL);
+        issues = await response.json();
+        updateIssueCount();
+        renderIssues();
+    } catch (error) {
+        console.error('Failed to load issues:', error);
+    }
 }
 
-// Save issues to localStorage
+// Save issues (not needed with API)
 function saveIssues() {
-    localStorage.setItem('interpreterIssues', JSON.stringify(issues));
+    // No longer needed - API handles saving
 }
 
 // Update issue count display
@@ -235,7 +241,7 @@ document.getElementById('issue-type').addEventListener('change', (e) => {
 });
 
 // Form submission
-document.getElementById('issue-form').addEventListener('submit', (e) => {
+document.getElementById('issue-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const issueType = document.getElementById('issue-type').value;
@@ -248,15 +254,13 @@ document.getElementById('issue-form').addEventListener('submit', (e) => {
     const interpreterLanguage = document.getElementById('interpreter-language').value;
     
     const issue = {
-        id: editingId || Date.now(),
         issueType,
         interpreterName,
         interpreterId,
         interpreterLanguage,
         startDate,
         resolutionDate,
-        status,
-        createdAt: editingId ? issues.find(i => i.id === editingId).createdAt : new Date().toISOString()
+        status
     };
     
     if (issueType === 'missed-call') {
@@ -268,23 +272,35 @@ document.getElementById('issue-form').addEventListener('submit', (e) => {
         issue.notes = document.getElementById('account-notes').value;
     }
     
-    if (editingId) {
-        const index = issues.findIndex(i => i.id === editingId);
-        issues[index] = issue;
-        editingId = null;
-    } else {
-        issues.push(issue);
+    try {
+        let response;
+        if (editingId) {
+            response = await fetch(`${API_URL}/${editingId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(issue)
+            });
+            editingId = null;
+        } else {
+            response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(issue)
+            });
+        }
+        
+        if (!response.ok) throw new Error('Failed to save');
+        
+        e.target.reset();
+        document.getElementById('missed-call-fields').style.display = 'none';
+        document.getElementById('account-issue-fields').style.display = 'none';
+        
+        await loadIssues();
+        alert(`Issue saved successfully! Total: ${issues.length} issue(s) reported.`);
+    } catch (error) {
+        console.error('Failed to save issue:', error);
+        alert('Failed to save issue. Please try again.');
     }
-    
-    saveIssues();
-    
-    e.target.reset();
-    document.getElementById('missed-call-fields').style.display = 'none';
-    document.getElementById('account-issue-fields').style.display = 'none';
-    
-    alert(`Issue saved successfully! You have ${issues.length} issue(s) reported.`);
-    updateIssueCount();
-    loadIssues();
 });
 
 // Render issues
@@ -381,13 +397,22 @@ function editIssue(id) {
     window.scrollTo(0, 0);
 }
 
-function deleteIssue(id) {
+async function deleteIssue(id) {
     if (!isSupervisorMode) {
         alert('Only supervisors can delete issues.');
         return;
     }
     
     if (!confirm('Are you sure you want to delete this issue?')) return;
+    
+    try {
+        await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+        await loadIssues();
+    } catch (error) {
+        console.error('Failed to delete issue:', error);
+        alert('Failed to delete issue');
+    }
+}
     
     issues = issues.filter(i => i.id !== id);
     saveIssues();
