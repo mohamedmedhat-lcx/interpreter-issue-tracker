@@ -413,11 +413,6 @@ async function deleteIssue(id) {
         alert('Failed to delete issue');
     }
 }
-    
-    issues = issues.filter(i => i.id !== id);
-    saveIssues();
-    loadIssues();
-}
 
 // Filters
 document.getElementById('search').addEventListener('input', renderIssues);
