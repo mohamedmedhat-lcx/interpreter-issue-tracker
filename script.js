@@ -363,7 +363,6 @@ document.getElementById('issue-form').addEventListener('submit', async (e) => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(issue)
             });
-            editingId = null;
         } else {
             response = await fetch(API_URL, {
                 method: 'POST',
@@ -375,6 +374,9 @@ document.getElementById('issue-form').addEventListener('submit', async (e) => {
         if (!response.ok) {
             throw new Error('Failed to save');
         }
+        
+        // Only reset editingId after successful response
+        editingId = null;
         
         e.target.reset();
         document.getElementById('missed-call-fields').style.display = 'none';
