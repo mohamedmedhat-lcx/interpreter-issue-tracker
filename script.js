@@ -129,12 +129,21 @@ const interpreters = [
 // Load issues from localStorage
 function loadIssues() {
     issues = JSON.parse(localStorage.getItem('interpreterIssues')) || [];
+    updateIssueCount();
     renderIssues();
 }
 
 // Save issues to localStorage
 function saveIssues() {
     localStorage.setItem('interpreterIssues', JSON.stringify(issues));
+}
+
+// Update issue count display
+function updateIssueCount() {
+    const countEl = document.getElementById('issue-count');
+    if (countEl) {
+        countEl.textContent = `${issues.length} issue(s) reported`;
+    }
 }
 
 // Populate interpreter dropdown
@@ -273,7 +282,8 @@ document.getElementById('issue-form').addEventListener('submit', (e) => {
     document.getElementById('missed-call-fields').style.display = 'none';
     document.getElementById('account-issue-fields').style.display = 'none';
     
-    alert('Issue saved successfully!');
+    alert(`Issue saved successfully! You have ${issues.length} issue(s) reported.`);
+    updateIssueCount();
     loadIssues();
 });
 
