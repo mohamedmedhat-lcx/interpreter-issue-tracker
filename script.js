@@ -446,9 +446,9 @@ function renderIssues() {
                 ${issue.interpreterId ? `<div class="issue-detail"><strong>ID:</strong> ${issue.interpreterId}</div>` : ''}
                 ${issue.interpreterLanguage ? `<div class="issue-detail"><strong>Language:</strong> ${issue.interpreterLanguage}</div>` : ''}
                 ${issue.callId ? `<div class="issue-detail"><strong>Call ID:</strong> ${issue.callId}</div>` : ''}
-                ${issue.accountStatus ? `<div class="issue-detail"><strong>Status:</strong> ${issue.accountStatus}</div>` : ''}
+                ${issue.accountStatus ? `<div class="issue-detail ${issue.accountStatus === 'locked' ? 'urgent-status' : ''}"><strong>Account Status:</strong> ${issue.accountStatus === 'locked' ? '🔴 LOCKED - URGENT' : issue.accountStatus.toUpperCase()}</div>` : ''}
                 ${issue.missedCallsCount ? `<div class="issue-detail"><strong>Missed Calls:</strong> ${issue.missedCallsCount}</div>` : ''}
-                <div class="issue-detail"><strong>Start:</strong> ${formatDate(issue.startDate)}</div>
+                <div class="issue-detail"><strong>Submission Date:</strong> ${formatDate(issue.startDate)}</div>
                 ${issue.resolutionDate ? `<div class="issue-detail"><strong>Resolved:</strong> ${formatDate(issue.resolutionDate)}</div>` : ''}
                 ${issue.attachmentUrl ? `<div class="issue-detail"><strong>Attachment:</strong> <a href="${issue.attachmentUrl}" target="_blank" style="color: #2196F3;">View File</a></div>` : ''}
             </div>

@@ -226,3 +226,18 @@ textarea {
     padding: 40px;
     color: #999;
 }
+
+.urgent-status {
+    color: #d32f2f;
+    font-weight: bold;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
