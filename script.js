@@ -155,6 +155,8 @@ function updateIssueCount() {
 // Populate interpreter dropdown
 function populateInterpreters() {
     const select = document.getElementById('interpreter-name');
+    const savedName = localStorage.getItem('myInterpreterName');
+    
     interpreters.forEach(interpreter => {
         const option = document.createElement('option');
         option.value = interpreter.name;
@@ -163,6 +165,16 @@ function populateInterpreters() {
         option.textContent = `${interpreter.name} (${interpreter.id})`;
         select.appendChild(option);
     });
+    
+    // Pre-select saved interpreter name
+    if (savedName) {
+        select.value = savedName;
+        const selectedOption = select.selectedOptions[0];
+        if (selectedOption) {
+            document.getElementById('interpreter-id').value = selectedOption.dataset.id;
+            document.getElementById('interpreter-language').value = selectedOption.dataset.language;
+        }
+    }
 }
 
 // Update interpreter ID and language when name is selected
@@ -170,8 +182,15 @@ document.getElementById('interpreter-name').addEventListener('change', (e) => {
     const selectedOption = e.target.selectedOptions[0];
     const interpreterId = selectedOption?.dataset.id || '';
     const language = selectedOption?.dataset.language || '';
+    const interpreterName = e.target.value;
+    
     document.getElementById('interpreter-id').value = interpreterId;
     document.getElementById('interpreter-language').value = language;
+    
+    // Remember this interpreter's name for filtering their own issues
+    if (interpreterName) {
+        localStorage.setItem('myInterpreterName', interpreterName);
+    }
 });
 
 // Supervisor mode
@@ -184,8 +203,8 @@ function enableSupervisorMode() {
         sessionStorage.setItem('supervisorMode', 'true');
         document.getElementById('supervisor-mode-btn').textContent = 'Supervisor Mode: ON';
         document.getElementById('supervisor-mode-btn').style.background = '#4CAF50';
-        alert('Supervisor mode enabled! You can now edit and delete issues.');
-        renderIssues(); // Re-render to show edit/delete buttons
+        alert('Supervisor mode enabled! You can now see all issues and edit/delete them.');
+        loadIssues(); // Reload to show all issues
     } else {
         alert('Incorrect password!');
     }
@@ -314,7 +333,14 @@ function renderIssues() {
         const matchesType = !filterType || issue.issueType === filterType;
         const matchesStatus = !filterStatus || issue.status === filterStatus;
         
-        return matchesSearch && matchesType && matchesStatus;
+        // If not supervisor mode, only show issues for the selected interpreter
+        let matchesInterpreter = true;
+        if (!isSupervisorMode) {
+            const myName = localStorage.getItem('myInterpreterName');
+            matchesInterpreter = myName ? issue.interpreterName === myName : true;
+        }
+        
+        return matchesSearch && matchesType && matchesStatus && matchesInterpreter;
     });
     
     const issuesList = document.getElementById('issues-list');
