@@ -148,7 +148,17 @@ function saveIssues() {
 function updateIssueCount() {
     const countEl = document.getElementById('issue-count');
     if (countEl) {
-        countEl.textContent = `${issues.length} issue(s) reported`;
+        let count = issues.length;
+        
+        // If not supervisor, only count their own issues
+        if (!isSupervisorMode) {
+            const myName = localStorage.getItem('myInterpreterName');
+            if (myName) {
+                count = issues.filter(i => i.interpreterName === myName).length;
+            }
+        }
+        
+        countEl.textContent = `${count} issue(s) reported`;
     }
 }
 
