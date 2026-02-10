@@ -353,7 +353,7 @@ function editIssue(id) {
     window.scrollTo(0, 0);
 }
 
-async async function deleteIssue(id) {
+async function deleteIssue(id) {
     // Require password for deleting
     const password = prompt('Enter supervisor password to delete:');
     if (password !== SUPERVISOR_PASSWORD) {
