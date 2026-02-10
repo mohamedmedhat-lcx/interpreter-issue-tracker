@@ -469,7 +469,15 @@ function formatIssueType(type) {
 }
 
 function formatStatus(status) {
-    return status.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    const statusMap = {
+        'open': 'Open',
+        'pending-interpreter': 'Pending Interpreter Validation',
+        'waiting-client': 'Waiting Client Response',
+        'pending-it': 'Pending IT Review',
+        'in-progress': 'In Progress',
+        'resolved': 'Resolved'
+    };
+    return statusMap[status] || status.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 }
 
 function formatDate(dateString) {

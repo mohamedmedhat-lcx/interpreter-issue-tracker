@@ -96,6 +96,9 @@
                     <label for="status">Status:</label>
                     <select id="status" required disabled>
                         <option value="open">Open</option>
+                        <option value="pending-interpreter" style="display: none;">Pending Interpreter Validation</option>
+                        <option value="waiting-client" style="display: none;">Waiting Client Response</option>
+                        <option value="pending-it" style="display: none;">Pending IT Review</option>
                         <option value="in-progress" style="display: none;">In Progress</option>
                         <option value="resolved" style="display: none;">Resolved</option>
                     </select>
@@ -122,6 +125,9 @@
                 <select id="filter-status">
                     <option value="">All Statuses</option>
                     <option value="open">Open</option>
+                    <option value="pending-interpreter">Pending Interpreter Validation</option>
+                    <option value="waiting-client">Waiting Client Response</option>
+                    <option value="pending-it">Pending IT Review</option>
                     <option value="in-progress">In Progress</option>
                     <option value="resolved">Resolved</option>
                 </select>
