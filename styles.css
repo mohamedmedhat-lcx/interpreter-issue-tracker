@@ -172,9 +172,24 @@ textarea {
     color: #c62828;
 }
 
-.issue-status.in-progress {
+.issue-status.pending-interpreter {
     background: #fff9c4;
     color: #f57f17;
+}
+
+.issue-status.waiting-client {
+    background: #ffe0b2;
+    color: #e65100;
+}
+
+.issue-status.pending-it {
+    background: #e1bee7;
+    color: #6a1b9a;
+}
+
+.issue-status.in-progress {
+    background: #bbdefb;
+    color: #1565c0;
 }
 
 .issue-status.resolved {
