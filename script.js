@@ -159,6 +159,36 @@ document.getElementById('interpreter-name').addEventListener('change', (e) => {
     document.getElementById('interpreter-language').value = language;
 });
 
+// Supervisor mode
+let isSupervisorMode = sessionStorage.getItem('supervisorMode') === 'true';
+
+function enableSupervisorMode() {
+    const password = prompt('Enter supervisor password:');
+    if (password === SUPERVISOR_PASSWORD) {
+        isSupervisorMode = true;
+        sessionStorage.setItem('supervisorMode', 'true');
+        document.getElementById('view-tab-btn').style.display = 'inline-block';
+        document.getElementById('supervisor-mode-btn').textContent = 'Supervisor Mode: ON';
+        document.getElementById('supervisor-mode-btn').style.background = '#4CAF50';
+        alert('Supervisor mode enabled!');
+    } else {
+        alert('Incorrect password!');
+    }
+}
+
+document.getElementById('supervisor-mode-btn').addEventListener('click', () => {
+    if (!isSupervisorMode) {
+        enableSupervisorMode();
+    }
+});
+
+// Check if already in supervisor mode
+if (isSupervisorMode) {
+    document.getElementById('view-tab-btn').style.display = 'inline-block';
+    document.getElementById('supervisor-mode-btn').textContent = 'Supervisor Mode: ON';
+    document.getElementById('supervisor-mode-btn').style.background = '#4CAF50';
+}
+
 // Load issues on page load
 populateInterpreters();
 loadIssues();
@@ -309,10 +339,8 @@ function formatDate(dateString) {
 }
 
 function editIssue(id) {
-    // Require password for editing
-    const password = prompt('Enter supervisor password to edit:');
-    if (password !== SUPERVISOR_PASSWORD) {
-        alert('Incorrect password. Only supervisors can edit issues.');
+    if (!isSupervisorMode) {
+        alert('Only supervisors can edit issues.');
         return;
     }
     
@@ -344,10 +372,8 @@ function editIssue(id) {
 }
 
 function deleteIssue(id) {
-    // Require password for deleting
-    const password = prompt('Enter supervisor password to delete:');
-    if (password !== SUPERVISOR_PASSWORD) {
-        alert('Incorrect password. Only supervisors can delete issues.');
+    if (!isSupervisorMode) {
+        alert('Only supervisors can delete issues.');
         return;
     }
     
@@ -397,8 +423,8 @@ document.getElementById('export-btn').addEventListener('click', () => {
     URL.revokeObjectURL(url);
 });
 
-// Export to JSON (for sharing between team members)
-document.getElementById('export-json-btn').addEventListener('click', () => {
+// Export my issues (for team members)
+document.getElementById('export-my-issues-btn').addEventListener('click', () => {
     if (issues.length === 0) {
         alert('No issues to export');
         return;
@@ -409,10 +435,10 @@ document.getElementById('export-json-btn').addEventListener('click', () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `issues-data-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `my-issues-${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    alert('Data exported! Share this file with your supervisor.');
+    alert('Your issues exported! Send this file to your supervisor.');
 });
 
 // Import from JSON
