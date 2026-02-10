@@ -1,0 +1,13 @@
+{
+  "name": "interpreter-issue-tracker",
+  "version": "1.0.0",
+  "description": "Issue tracking system for interpreter team",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  }
+}
