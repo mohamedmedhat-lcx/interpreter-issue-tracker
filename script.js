@@ -268,6 +268,21 @@ document.getElementById('issue-type').addEventListener('change', (e) => {
     }
 });
 
+// Show resolution date field when status is resolved (supervisor only)
+document.getElementById('status').addEventListener('change', (e) => {
+    const resolutionDateGroup = document.getElementById('resolution-date-group');
+    if (e.target.value === 'resolved') {
+        resolutionDateGroup.style.display = 'block';
+        // Auto-fill current date/time if empty
+        const resolutionDateInput = document.getElementById('resolution-date');
+        if (!resolutionDateInput.value) {
+            resolutionDateInput.value = new Date().toISOString().slice(0, 16);
+        }
+    } else {
+        resolutionDateGroup.style.display = 'none';
+    }
+});
+
 // Form submission
 document.getElementById('issue-form').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -276,7 +291,8 @@ document.getElementById('issue-form').addEventListener('submit', async (e) => {
     const interpreterName = document.getElementById('interpreter-name').value;
     const startDate = document.getElementById('start-date').value;
     const attachmentUrl = document.getElementById('attachment-url').value;
-    const status = 'open'; // Always open for new issues
+    const status = document.getElementById('status').value;
+    const resolutionDate = document.getElementById('resolution-date').value;
     
     const interpreterId = document.getElementById('interpreter-id').value;
     const interpreterLanguage = document.getElementById('interpreter-language').value;
@@ -289,7 +305,7 @@ document.getElementById('issue-form').addEventListener('submit', async (e) => {
         startDate,
         attachmentUrl,
         status,
-        resolutionDate: null
+        resolutionDate: resolutionDate || null
     };
     
     if (issueType === 'missed-call') {
@@ -422,6 +438,8 @@ function editIssue(id) {
     document.getElementById('start-date').value = issue.startDate;
     document.getElementById('attachment-url').value = issue.attachmentUrl || '';
     document.getElementById('status').value = issue.status;
+    document.getElementById('status').dispatchEvent(new Event('change')); // Trigger resolution date visibility
+    document.getElementById('resolution-date').value = issue.resolutionDate || '';
     
     if (issue.issueType === 'missed-call') {
         document.getElementById('call-id').value = issue.callId || '';
