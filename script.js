@@ -339,6 +339,14 @@ document.getElementById('issue-form').addEventListener('submit', async (e) => {
         e.target.reset();
         document.getElementById('missed-call-fields').style.display = 'none';
         document.getElementById('account-issue-fields').style.display = 'none';
+        document.getElementById('resolution-date-group').style.display = 'none';
+        
+        // Reset status dropdown for non-supervisors
+        document.getElementById('status').disabled = true;
+        document.getElementById('status').value = 'open';
+        document.querySelectorAll('#status option').forEach((opt, idx) => {
+            if (idx > 0) opt.style.display = 'none';
+        });
         
         await loadIssues();
         alert(`Issue saved successfully! Total: ${issues.length} issue(s) reported.`);
@@ -429,6 +437,10 @@ function editIssue(id) {
     if (!issue) return;
     
     editingId = id;
+    
+    // Enable status dropdown for supervisor
+    document.getElementById('status').disabled = false;
+    document.querySelectorAll('#status option').forEach(opt => opt.style.display = 'block');
     
     document.getElementById('issue-type').value = issue.issueType;
     document.getElementById('issue-type').dispatchEvent(new Event('change'));
