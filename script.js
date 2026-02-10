@@ -357,13 +357,14 @@ document.getElementById('issue-form').addEventListener('submit', async (e) => {
     
     try {
         let response;
-        if (editingId) {
-            response = await fetch(`${API_URL}/${editingId}`, {
+        const currentEditingId = editingId; // Save the ID before making the request
+        
+        if (currentEditingId) {
+            response = await fetch(`${API_URL}/${currentEditingId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(issue)
             });
-            editingId = null;
         } else {
             response = await fetch(API_URL, {
                 method: 'POST',
@@ -373,8 +374,13 @@ document.getElementById('issue-form').addEventListener('submit', async (e) => {
         }
         
         if (!response.ok) {
-            throw new Error('Failed to save');
+            const errorData = await response.json();
+            console.error('Server error:', errorData);
+            throw new Error(errorData.error || 'Failed to save');
         }
+        
+        // Only reset editingId after successful save
+        editingId = null;
         
         e.target.reset();
         document.getElementById('missed-call-fields').style.display = 'none';
@@ -391,10 +397,10 @@ document.getElementById('issue-form').addEventListener('submit', async (e) => {
         }
         
         await loadIssues();
-        alert(`Issue saved successfully! Total: ${issues.length} issue(s) reported.`);
+        alert(`Issue saved successfully!`);
     } catch (error) {
         console.error('Failed to save issue:', error);
-        alert('Failed to save issue. Please try again.');
+        alert('Failed to save issue: ' + error.message);
     }
 });
 
