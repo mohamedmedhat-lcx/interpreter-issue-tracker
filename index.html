@@ -28,7 +28,19 @@
 
                 <div class="form-group">
                     <label for="interpreter-name">Interpreter Name:</label>
-                    <input type="text" id="interpreter-name" required>
+                    <select id="interpreter-name" required>
+                        <option value="">Select interpreter...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="interpreter-id">Interpreter ID:</label>
+                    <input type="text" id="interpreter-id" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label for="interpreter-language">Language:</label>
+                    <input type="text" id="interpreter-language" readonly>
                 </div>
 
                 <div id="missed-call-fields" class="conditional-fields" style="display: none;">

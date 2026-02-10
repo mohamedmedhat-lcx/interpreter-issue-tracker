@@ -2,6 +2,130 @@
 const API_URL = '/api/issues';
 let issues = [];
 let editingId = null;
+const SUPERVISOR_PASSWORD = 'supervisor123'; // Change this password
+
+// Interpreter list - will be populated from data
+const interpreters = [
+    { name: "Filmon Bezabh", id: "20280", language: "Amharic" },
+    { name: "Sumyat Noe", id: "19034", language: "Burmese" },
+    { name: "Talha Idress", id: "19029", language: "Punjabi" },
+    { name: "ahtsham Ahmed", id: "19036", language: "Pashto" },
+    { name: "Nahili Midekso", id: "20466", language: "Amharic" },
+    { name: "Faress Eissa", id: "19078", language: "Arabic" },
+    { name: "Noelia Mariel Castro", id: "19164", language: "Spanish" },
+    { name: "Rawan Mohamed", id: "20107", language: "Arabic" },
+    { name: "Nicolas Martinez", id: "19163", language: "Spanish" },
+    { name: "Ahmed Elsayed", id: "20609", language: "Arabic" },
+    { name: "Eloy Andrade", id: "19191", language: "Spanish" },
+    { name: "Anas Saeed", id: "20791", language: "Arabic" },
+    { name: "Ignacio Monje", id: "19848", language: "Spanish" },
+    { name: "Wilson Perez", id: "19915", language: "Spanish" },
+    { name: "Oishik Rahman", id: "20449", language: "Bengali" },
+    { name: "Youssef Alnemr", id: "20108", language: "Arabic" },
+    { name: "Herard Francisca", id: "20465", language: "French" },
+    { name: "Roha Ahmed", id: "20284", language: "Arabic" },
+    { name: "Jesula Francillon", id: "20608", language: "Haitian Creole" },
+    { name: "Maxcein Louhis", id: "20683", language: "Haitian Creole" },
+    { name: "Claudy Saintilme", id: "20543", language: "Haitian Creole" },
+    { name: "Carolina Laurido", id: "20313", language: "Spanish" },
+    { name: "Khadija Quraishi", id: "20311", language: "Pashto" },
+    { name: "Hira Jann", id: "20344", language: "Pashto" },
+    { name: "Leena Mohammadzai", id: "20436", language: "Pashto" },
+    { name: "Dave Marc-Onel", id: "20435", language: "Haitian Creole" },
+    { name: "Riazullah Safi", id: "20611", language: "Pashto" },
+    { name: "Dharshna Soundararajan", id: "20430", language: "Tamil" },
+    { name: "Joao Horta", id: "20541", language: "Portuguese" },
+    { name: "Omar Elsakhawy", id: "20468", language: "Arabic" },
+    { name: "Carlos Junior", id: "20794", language: "Portuguese" },
+    { name: "Rahimyar Sahibzada", id: "20282", language: "Punjabi" },
+    { name: "Miguel Lopez", id: "20464", language: "Spanish" },
+    { name: "Rizwan Ayub", id: "20283", language: "Punjabi" },
+    { name: "Hamza Khan", id: "20448", language: "Punjabi" },
+    { name: "Silfaude Jerome", id: "20559", language: "Haitian Creole" },
+    { name: "Shyngis Kanapin", id: "21701", language: "Russian" },
+    { name: "Mohamed Amin", id: "20385", language: "Somali" },
+    { name: "Martin Biritos", id: "19080", language: "Spanish" },
+    { name: "Kamran Mohammadi", id: "20610", language: "Dari" },
+    { name: "Muhammad Sajjad", id: "20684", language: "Hindi" },
+    { name: "PATRICK AQUINO", id: "20685", language: "Tagalog" },
+    { name: "Mariam Castillo", id: "20682", language: "Spanish" },
+    { name: "Paula Romero", id: "19580", language: "Spanish" },
+    { name: "Youssef Yasser", id: "20680", language: "German" },
+    { name: "Boris Gatwaza", id: "20716", language: "French" },
+    { name: "Jesús Daniel Rhenals Pinto", id: "20792", language: "Spanish" },
+    { name: "Erwan Rumata", id: "20793", language: "Kinyarwanda" },
+    { name: "Javier Andres Molina", id: "20798", language: "Spanish" },
+    { name: "Karen Sigilwig", id: "20855", language: "Spanish" },
+    { name: "Mariana Belen Jofre", id: "20797", language: "Spanish" },
+    { name: "Madina Torakai", id: "20796", language: "Dari" },
+    { name: "Kervent Sanon", id: "20795", language: "French" },
+    { name: "Santiago Caicedo", id: "21941", language: "Spanish" },
+    { name: "Carmen Macias", id: "20837", language: "Spanish" },
+    { name: "Mohamed abdikadir", id: "20838", language: "Swahili" },
+    { name: "Gustavo Henriquez", id: "20462", language: "Spanish" },
+    { name: "Aya Haji", id: "20903", language: "Oromo" },
+    { name: "Jesema Yasmin", id: "20904", language: "Tamil" },
+    { name: "Niaz Ahmed", id: "20901", language: "Hindi" },
+    { name: "Carmenza Gomez", id: "21342", language: "Spanish" },
+    { name: "Milenko Carlessi", id: "19241", language: "Spanish" },
+    { name: "Jose Baisi", id: "21817", language: "Spanish" },
+    { name: "Sebastian Bulnes", id: "19035", language: "Spanish" },
+    { name: "Ana Montalvo", id: "21958", language: "Spanish" },
+    { name: "Maria Amaya", id: "22315", language: "Spanish" },
+    { name: "Sergio Rivas", id: "22314", language: "Spanish" },
+    { name: "Maria Valencia", id: "22313", language: "Spanish" },
+    { name: "Rosalia Flores", id: "22316", language: "Spanish" },
+    { name: "Jose Gonzalez", id: "22340", language: "Spanish" },
+    { name: "Derian Orozco", id: "22407", language: "Spanish" },
+    { name: "Heyoan Gonzalez", id: "22409", language: "Spanish" },
+    { name: "Emanuel Noguera", id: "22415", language: "Spanish" },
+    { name: "Valentina Tamayo", id: "22422", language: "Spanish" },
+    { name: "Hussein Samy", id: "22470", language: "Arabic" },
+    { name: "Rosalia Farfan", id: "22410", language: "Spanish" },
+    { name: "Viviana Peinado", id: "22411", language: "Spanish" },
+    { name: "Josue Osorio", id: "18042", language: "Spanish" },
+    { name: "Edmilson Pungi", id: "22537", language: "Portuguese" },
+    { name: "Ronald Pac", id: "22552", language: "Spanish" },
+    { name: "Adriana Alejandra Martinez Gutierrez", id: "22561", language: "Spanish" },
+    { name: "Maximo Demarco", id: "22581", language: "Spanish" },
+    { name: "Jade Menezes Brito", id: "19366", language: "Portuguese" },
+    { name: "Lomje Patricia Fajardo Martinez", id: "22589", language: "Spanish" },
+    { name: "Stephannya Mora", id: "22590", language: "Spanish" },
+    { name: "Patricia Joi Gonzaga Valdez", id: "22594", language: "Tagalog" },
+    { name: "Francis Indo Rivera", id: "22632", language: "Spanish" },
+    { name: "Gustavo Andres Acosta Romero", id: "22628", language: "Spanish" },
+    { name: "Edier Giraldo Arengas", id: "22647", language: "Spanish" },
+    { name: "Edson Antonio Calvo Valdez", id: "22661", language: "Spanish" },
+    { name: "Deana Kruseman", id: "22675", language: "Spanish" },
+    { name: "Ahmed Magdy Abdelhamed Mohamed", id: "22676", language: "Arabic" },
+    { name: "Camila Aimee Ruiz Inzunza", id: "22726", language: "Spanish" },
+    { name: "Mohamed Hamam Ahmed Mostafa", id: "22783", language: "Arabic" },
+    { name: "Rashida Risso Tomes", id: "22797", language: "Spanish" },
+    { name: "Andrea Coca", id: "21308", language: "Spanish" },
+    { name: "Miguel Angel Perez Mendez", id: "22820", language: "Spanish" },
+    { name: "Samuel Sanchez Herrera", id: "22819", language: "Spanish" },
+    { name: "Jose Leonardo Juarez Meza", id: "22818", language: "Spanish" },
+    { name: "Felipe Vargas", id: "22817", language: "Spanish" },
+    { name: "Jhonatan Orjuela Barrios", id: "22829", language: "Spanish" },
+    { name: "Constanza Coll", id: "22845", language: "Spanish" },
+    { name: "Agustin Alexander Castillo Valladares", id: "22846", language: "Spanish" },
+    { name: "Nyree Aguilar Soto", id: "22862", language: "Spanish" },
+    { name: "Sergio Zavala Morles", id: "16721", language: "Spanish" },
+    { name: "Jorge Chan Moreno", id: "22863", language: "Spanish" },
+    { name: "Luis Alfonso Sanchez Ordonez", id: "22864", language: "Spanish" },
+    { name: "Bryant Steven Ramírez Sandoval", id: "21584", language: "Spanish" },
+    { name: "Fabian Alejandro Sanchez Blanco", id: "22877", language: "Spanish" },
+    { name: "Héctor García Chávez", id: "22893", language: "Spanish" },
+    { name: "Rahi Arlenn Javier Mendoza Melo", id: "22911", language: "Spanish" },
+    { name: "Tatiana Tais Capria", id: "19162", language: "Spanish" },
+    { name: "Erika Paola Aguayza Castro", id: "22919", language: "Spanish" },
+    { name: "Juan Arana", id: "13175", language: "Spanish" },
+    { name: "Eliecer Daniel Colina Andrade", id: "22941", language: "Spanish" },
+    { name: "Jahaziel García Hernández", id: "22953", language: "Spanish" },
+    { name: "Ana Marcela Hernández Cabellos", id: "22954", language: "Spanish" },
+    { name: "Cesar Alarcon Serrano", id: "22961", language: "Spanish" },
+    { name: "Gustavo Adolfo Ramirez Azahar", id: "23064", language: "Spanish" }
+];
 
 // Load issues from server
 async function loadIssues() {
@@ -15,7 +139,30 @@ async function loadIssues() {
     }
 }
 
+// Populate interpreter dropdown
+function populateInterpreters() {
+    const select = document.getElementById('interpreter-name');
+    interpreters.forEach(interpreter => {
+        const option = document.createElement('option');
+        option.value = interpreter.name;
+        option.dataset.id = interpreter.id;
+        option.dataset.language = interpreter.language;
+        option.textContent = `${interpreter.name} (${interpreter.id})`;
+        select.appendChild(option);
+    });
+}
+
+// Update interpreter ID and language when name is selected
+document.getElementById('interpreter-name').addEventListener('change', (e) => {
+    const selectedOption = e.target.selectedOptions[0];
+    const interpreterId = selectedOption?.dataset.id || '';
+    const language = selectedOption?.dataset.language || '';
+    document.getElementById('interpreter-id').value = interpreterId;
+    document.getElementById('interpreter-language').value = language;
+});
+
 // Load issues on page load
+populateInterpreters();
 loadIssues();
 
 // Tab switching
@@ -60,9 +207,14 @@ document.getElementById('issue-form').addEventListener('submit', async (e) => {
     const resolutionDate = document.getElementById('resolution-date').value;
     const status = document.getElementById('status').value;
     
+    const interpreterId = document.getElementById('interpreter-id').value;
+    const interpreterLanguage = document.getElementById('interpreter-language').value;
+    
     const issue = {
         issueType,
         interpreterName,
+        interpreterId,
+        interpreterLanguage,
         startDate,
         resolutionDate,
         status
@@ -135,6 +287,8 @@ function renderIssues() {
             </div>
             <div class="issue-details">
                 <div class="issue-detail"><strong>Interpreter:</strong> ${issue.interpreterName}</div>
+                ${issue.interpreterId ? `<div class="issue-detail"><strong>ID:</strong> ${issue.interpreterId}</div>` : ''}
+                ${issue.interpreterLanguage ? `<div class="issue-detail"><strong>Language:</strong> ${issue.interpreterLanguage}</div>` : ''}
                 ${issue.callId ? `<div class="issue-detail"><strong>Call ID:</strong> ${issue.callId}</div>` : ''}
                 ${issue.accountStatus ? `<div class="issue-detail"><strong>Status:</strong> ${issue.accountStatus}</div>` : ''}
                 ${issue.missedCallsCount ? `<div class="issue-detail"><strong>Missed Calls:</strong> ${issue.missedCallsCount}</div>` : ''}
@@ -165,6 +319,13 @@ function formatDate(dateString) {
 }
 
 function editIssue(id) {
+    // Require password for editing
+    const password = prompt('Enter supervisor password to edit:');
+    if (password !== SUPERVISOR_PASSWORD) {
+        alert('Incorrect password. Only supervisors can edit issues.');
+        return;
+    }
+    
     const issue = issues.find(i => i.id === id);
     if (!issue) return;
     
@@ -173,6 +334,8 @@ function editIssue(id) {
     document.getElementById('issue-type').value = issue.issueType;
     document.getElementById('issue-type').dispatchEvent(new Event('change'));
     document.getElementById('interpreter-name').value = issue.interpreterName;
+    document.getElementById('interpreter-id').value = issue.interpreterId || '';
+    document.getElementById('interpreter-language').value = issue.interpreterLanguage || '';
     document.getElementById('start-date').value = issue.startDate;
     document.getElementById('resolution-date').value = issue.resolutionDate || '';
     document.getElementById('status').value = issue.status;
@@ -190,7 +353,14 @@ function editIssue(id) {
     window.scrollTo(0, 0);
 }
 
-async function deleteIssue(id) {
+async async function deleteIssue(id) {
+    // Require password for deleting
+    const password = prompt('Enter supervisor password to delete:');
+    if (password !== SUPERVISOR_PASSWORD) {
+        alert('Incorrect password. Only supervisors can delete issues.');
+        return;
+    }
+    
     if (!confirm('Are you sure you want to delete this issue?')) return;
     
     try {
@@ -214,11 +384,13 @@ document.getElementById('export-btn').addEventListener('click', () => {
         return;
     }
     
-    const headers = ['ID', 'Type', 'Interpreter', 'Call ID', 'Account Status', 'Missed Calls', 'Reason/Notes', 'Start Date', 'Resolution Date', 'Status'];
+    const headers = ['ID', 'Type', 'Interpreter', 'Interpreter ID', 'Language', 'Call ID', 'Account Status', 'Missed Calls', 'Reason/Notes', 'Start Date', 'Resolution Date', 'Status'];
     const rows = issues.map(issue => [
         issue.id,
         formatIssueType(issue.issueType),
         issue.interpreterName,
+        issue.interpreterId || '',
+        issue.interpreterLanguage || '',
         issue.callId || '',
         issue.accountStatus || '',
         issue.missedCallsCount || '',
