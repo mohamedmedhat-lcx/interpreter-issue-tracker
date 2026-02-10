@@ -304,10 +304,10 @@ document.getElementById('status').addEventListener('change', (e) => {
     const resolutionDateGroup = document.getElementById('resolution-date-group');
     if (e.target.value === 'resolved') {
         resolutionDateGroup.style.display = 'block';
-        // Auto-fill current date/time if empty
+        // Auto-fill current date/time in PST if empty
         const resolutionDateInput = document.getElementById('resolution-date');
         if (!resolutionDateInput.value) {
-            resolutionDateInput.value = new Date().toISOString().slice(0, 16);
+            setPSTDateTime('resolution-date');
         }
     } else {
         resolutionDateGroup.style.display = 'none';
@@ -564,5 +564,25 @@ document.getElementById('export-btn').addEventListener('click', () => {
     URL.revokeObjectURL(url);
 });
 
-// Set default start date to now
-document.getElementById('start-date').value = new Date().toISOString().slice(0, 16);
+// Set default start date to now in PST
+function setPSTDateTime(inputId) {
+    const input = document.getElementById(inputId);
+    const now = new Date();
+    
+    // Convert to PST (UTC-8)
+    const pstOffset = -8 * 60; // PST is UTC-8
+    const localOffset = now.getTimezoneOffset(); // User's timezone offset
+    const pstTime = new Date(now.getTime() + (localOffset + pstOffset) * 60000);
+    
+    // Format for datetime-local input
+    const year = pstTime.getFullYear();
+    const month = String(pstTime.getMonth() + 1).padStart(2, '0');
+    const day = String(pstTime.getDate()).padStart(2, '0');
+    const hours = String(pstTime.getHours()).padStart(2, '0');
+    const minutes = String(pstTime.getMinutes()).padStart(2, '0');
+    
+    input.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+// Set default start date to now in PST
+setPSTDateTime('start-date');
