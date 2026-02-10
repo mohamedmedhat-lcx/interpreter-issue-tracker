@@ -28,15 +28,20 @@ export default async function handler(req, res) {
             issues.push(newIssue);
             res.status(200).json(newIssue);
         } else if (req.method === 'PUT') {
-            // Update issue
-            const urlParts = req.url.split('/');
-            const id = parseInt(urlParts[urlParts.length - 1]);
+            // Update issue - get ID from query parameter
+            const url = new URL(req.url, `http://${req.headers.host}`);
+            const pathParts = url.pathname.split('/');
+            const id = parseInt(pathParts[pathParts.length - 1]);
+            
+            console.log('PUT request - ID:', id, 'URL:', req.url);
+            
             const index = issues.findIndex(i => i.id === id);
             if (index === -1) {
-                res.status(404).json({ error: 'Issue not found' });
+                console.log('Issue not found, available IDs:', issues.map(i => i.id));
+                res.status(404).json({ error: 'Issue not found', requestedId: id, availableIds: issues.map(i => i.id) });
                 return;
             }
-            issues[index] = { ...issues[index], ...req.body };
+            issues[index] = { ...issues[index], ...req.body, id: issues[index].id };
             res.status(200).json(issues[index]);
         } else if (req.method === 'DELETE') {
             // Delete issue

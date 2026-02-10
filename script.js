@@ -30,7 +30,7 @@ function authenticateInterpreter() {
         sessionStorage.setItem('interpreterAuth', selectedName);
         return true;
     } else {
-        alert('Incorrect password! Password format: YourFirstName + YourID\nExample: Filmon20280');
+        alert('Incorrect password! If you forgot your password, please contact your supervisor.');
         return false;
     }
 }
