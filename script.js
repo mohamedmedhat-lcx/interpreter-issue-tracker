@@ -182,10 +182,10 @@ function enableSupervisorMode() {
     if (password === SUPERVISOR_PASSWORD) {
         isSupervisorMode = true;
         sessionStorage.setItem('supervisorMode', 'true');
-        document.getElementById('view-tab-btn').style.display = 'inline-block';
         document.getElementById('supervisor-mode-btn').textContent = 'Supervisor Mode: ON';
         document.getElementById('supervisor-mode-btn').style.background = '#4CAF50';
-        alert('Supervisor mode enabled!');
+        alert('Supervisor mode enabled! You can now edit and delete issues.');
+        renderIssues(); // Re-render to show edit/delete buttons
     } else {
         alert('Incorrect password!');
     }
@@ -199,7 +199,6 @@ document.getElementById('supervisor-mode-btn').addEventListener('click', () => {
 
 // Check if already in supervisor mode
 if (isSupervisorMode) {
-    document.getElementById('view-tab-btn').style.display = 'inline-block';
     document.getElementById('supervisor-mode-btn').textContent = 'Supervisor Mode: ON';
     document.getElementById('supervisor-mode-btn').style.background = '#4CAF50';
 }
@@ -343,10 +342,12 @@ function renderIssues() {
             </div>
             ${issue.reason ? `<div class="issue-detail"><strong>Reason:</strong> ${issue.reason}</div>` : ''}
             ${issue.notes ? `<div class="issue-detail"><strong>Notes:</strong> ${issue.notes}</div>` : ''}
+            ${isSupervisorMode ? `
             <div class="issue-actions">
                 <button class="btn-small btn-edit" onclick="editIssue(${issue.id})">Edit</button>
                 <button class="btn-small btn-delete" onclick="deleteIssue(${issue.id})">Delete</button>
             </div>
+            ` : ''}
         </div>
     `).join('');
 }
