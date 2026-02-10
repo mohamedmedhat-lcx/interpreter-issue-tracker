@@ -454,54 +454,5 @@ document.getElementById('export-btn').addEventListener('click', () => {
     URL.revokeObjectURL(url);
 });
 
-// Export my issues (for team members)
-document.getElementById('export-my-issues-btn').addEventListener('click', () => {
-    if (issues.length === 0) {
-        alert('No issues to export');
-        return;
-    }
-    
-    const dataStr = JSON.stringify(issues, null, 2);
-    const blob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `my-issues-${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    alert('Your issues exported! Send this file to your supervisor.');
-});
-
-// Import from JSON
-document.getElementById('import-json-btn').addEventListener('click', () => {
-    document.getElementById('import-file').click();
-});
-
-document.getElementById('import-file').addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = (event) => {
-        try {
-            const importedIssues = JSON.parse(event.target.result);
-            
-            // Merge with existing issues (avoid duplicates by ID)
-            const existingIds = new Set(issues.map(i => i.id));
-            const newIssues = importedIssues.filter(i => !existingIds.has(i.id));
-            
-            issues = [...issues, ...newIssues];
-            saveIssues();
-            loadIssues();
-            
-            alert(`Imported ${newIssues.length} new issues!`);
-        } catch (error) {
-            alert('Error importing file. Please make sure it\'s a valid JSON file.');
-        }
-    };
-    reader.readAsText(file);
-    e.target.value = ''; // Reset file input
-});
-
 // Set default start date to now
 document.getElementById('start-date').value = new Date().toISOString().slice(0, 16);
