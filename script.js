@@ -4,6 +4,37 @@ let issues = [];
 let editingId = null;
 const SUPERVISOR_PASSWORD = 'supervisor123'; // Change this password
 
+// Interpreter authentication
+function authenticateInterpreter() {
+    const selectedName = document.getElementById('interpreter-name').value;
+    const interpreterId = document.getElementById('interpreter-id').value;
+    
+    if (!selectedName || !interpreterId) {
+        alert('Please select your name first');
+        return false;
+    }
+    
+    // Check if already authenticated in this session
+    const savedAuth = sessionStorage.getItem('interpreterAuth');
+    if (savedAuth === selectedName) {
+        return true;
+    }
+    
+    // Generate expected password: FirstnameID (e.g., Filmon20280)
+    const firstName = selectedName.split(' ')[0];
+    const expectedPassword = firstName + interpreterId;
+    
+    const enteredPassword = prompt('Enter your password to submit:');
+    
+    if (enteredPassword === expectedPassword) {
+        sessionStorage.setItem('interpreterAuth', selectedName);
+        return true;
+    } else {
+        alert('Incorrect password! Password format: YourFirstName + YourID\nExample: Filmon20280');
+        return false;
+    }
+}
+
 // Interpreter list - will be populated from data
 const interpreters = [
     { name: "Filmon Bezabh", id: "20280", language: "Amharic" },
@@ -287,6 +318,13 @@ document.getElementById('status').addEventListener('change', (e) => {
 document.getElementById('issue-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     
+    // Authenticate interpreter if not in supervisor mode
+    if (!isSupervisorMode && !editingId) {
+        if (!authenticateInterpreter()) {
+            return; // Stop submission if authentication fails
+        }
+    }
+    
     const issueType = document.getElementById('issue-type').value;
     const interpreterName = document.getElementById('interpreter-name').value;
     const startDate = document.getElementById('start-date').value;
@@ -334,7 +372,9 @@ document.getElementById('issue-form').addEventListener('submit', async (e) => {
             });
         }
         
-        if (!response.ok) throw new Error('Failed to save');
+        if (!response.ok) {
+            throw new Error('Failed to save');
+        }
         
         e.target.reset();
         document.getElementById('missed-call-fields').style.display = 'none';
@@ -342,11 +382,13 @@ document.getElementById('issue-form').addEventListener('submit', async (e) => {
         document.getElementById('resolution-date-group').style.display = 'none';
         
         // Reset status dropdown for non-supervisors
-        document.getElementById('status').disabled = true;
-        document.getElementById('status').value = 'open';
-        document.querySelectorAll('#status option').forEach((opt, idx) => {
-            if (idx > 0) opt.style.display = 'none';
-        });
+        if (!isSupervisorMode) {
+            document.getElementById('status').disabled = true;
+            document.getElementById('status').value = 'open';
+            document.querySelectorAll('#status option').forEach((opt, idx) => {
+                if (idx > 0) opt.style.display = 'none';
+            });
+        }
         
         await loadIssues();
         alert(`Issue saved successfully! Total: ${issues.length} issue(s) reported.`);
