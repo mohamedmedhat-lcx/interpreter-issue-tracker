@@ -403,12 +403,20 @@ function renderIssues() {
     const searchTerm = document.getElementById('search').value.toLowerCase();
     const filterType = document.getElementById('filter-type').value;
     const filterStatus = document.getElementById('filter-status').value;
+    const filterDate = document.getElementById('filter-date').value;
     
     let filtered = issues.filter(issue => {
         const matchesSearch = issue.interpreterName.toLowerCase().includes(searchTerm) ||
                             (issue.callId && issue.callId.toLowerCase().includes(searchTerm));
         const matchesType = !filterType || issue.issueType === filterType;
         const matchesStatus = !filterStatus || issue.status === filterStatus;
+        
+        // Filter by date (compare only the date part, not time)
+        let matchesDate = true;
+        if (filterDate) {
+            const issueDate = issue.startDate ? issue.startDate.split('T')[0] : '';
+            matchesDate = issueDate === filterDate;
+        }
         
         // If not supervisor mode, only show issues for the selected interpreter
         let matchesInterpreter = true;
@@ -417,7 +425,7 @@ function renderIssues() {
             matchesInterpreter = myName ? issue.interpreterName === myName : true;
         }
         
-        return matchesSearch && matchesType && matchesStatus && matchesInterpreter;
+        return matchesSearch && matchesType && matchesStatus && matchesDate && matchesInterpreter;
     });
     
     const issuesList = document.getElementById('issues-list');
@@ -526,6 +534,7 @@ async function deleteIssue(id) {
 }
 
 // Filters
+document.getElementById('filter-date').addEventListener('change', renderIssues);
 document.getElementById('search').addEventListener('input', renderIssues);
 document.getElementById('filter-type').addEventListener('change', renderIssues);
 document.getElementById('filter-status').addEventListener('change', renderIssues);
